@@ -16,7 +16,7 @@ namespace SslChat.Server
 {
     internal class Program
     {
-        public static TcpServer server;
+        public static TcpServer Server;
 
         public static HistoryList<Message> Messages = new HistoryList<Message>(50);
         public static int ChatClients;
@@ -26,25 +26,28 @@ namespace SslChat.Server
             var cfg = MicroProtocolConfiguration.Instance;
             var certificate = new X509Certificate("localhost.pfx", "foobar");
             var sslFactory = cfg.GetServerSslFactory(certificate);
-            server = new TcpServer(new IPEndPoint(IPAddress.Loopback, 12345), cfg, sslFactory)
+            Server = new TcpServer(new IPEndPoint(IPAddress.Loopback, 12345), cfg, sslFactory)
             {
                 AcceptClient = Server_HandleNewClient
             };
-            server.ClientDisconnected += Server_ClientDisconnected;
-            server.ReceiveTimeout = TimeSpan.FromMilliseconds(5000);
-            server.Timeout += Server_Timeout;
-            server.On<C2S_JoinChat>(JoinChat);
-            server.On<C2S_SendMessage>(SendMessage);
-            server.Start();
+            Server.ClientDisconnected += Server_ClientDisconnected;
+            Server.ReceiveTimeout = TimeSpan.FromMilliseconds(5000);
+            Server.Timeout += Server_Timeout;
+            Server.On<C2S_JoinChat>(JoinChat);
+            Server.On<C2S_SendMessage>(SendMessage);
+            Server.Start();
+
             AddNewMessage(new ServerMessage(ConsoleColor.Cyan,
                 $"Welcome to the chat server [{MicroProtocolConfiguration.VersionString}]"));
             Console.WriteLine("Server started. Press ENTER to quit");
             Console.ReadLine();
+
             Console.Write("Stopping... ");
             AddNewMessage(new ServerMessage(ConsoleColor.Red, "Server shutting down..."));
-            server.Off();
+            Server.Off(); //clear type handlers
+            Server.ClientDisconnected -= Server_ClientDisconnected; //remove disconnect handler
             Thread.Sleep(1000);
-            server.Stop();
+            Server.Stop();
             Console.WriteLine("OK");
             Console.ReadLine();
         }
@@ -85,7 +88,7 @@ namespace SslChat.Server
             lock (Messages)
             {
                 Messages.Add(msg);
-                foreach (var con in server.Connections)
+                foreach (var con in Server.Connections)
                 {
                     if (con.Value.Connected && con.Value.Data.Get("Connected", false))
                     {
