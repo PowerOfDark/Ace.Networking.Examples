@@ -38,6 +38,7 @@ namespace SslChat.Common
             RequireClientCertificate = true;
             CustomOutcomingMessageQueue = GlobalOutcomingMessageQueue.Instance;
             CustomIncomingMessageQueue = GlobalIncomingMessageQueue.Instance;
+            SslMode = SslMode.Full;
             Initialize();
         }
 
@@ -51,14 +52,14 @@ namespace SslChat.Common
         public override ClientSslStreamFactory GetClientSslFactory(string targetCommonCame = "",
             X509Certificate certificate = null)
         {
-            if (UseSsl & RequireClientCertificate && certificate == null)
+            if (SslMode != SslMode.None & RequireClientCertificate && certificate == null)
                 throw new ArgumentNullException(nameof(certificate));
             return new ClientSslStreamFactory(targetCommonCame, certificate);
         }
 
         public override ServerSslStreamFactory GetServerSslFactory(X509Certificate certificate = null)
         {
-            if (UseSsl && certificate == null)
+            if (SslMode != SslMode.None && certificate == null)
                 throw new ArgumentNullException(nameof(certificate));
             return new ServerSslStreamFactory(certificate, RequireClientCertificate);
         }
