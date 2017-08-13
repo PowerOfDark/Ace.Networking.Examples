@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using Ace.Networking;
 using Ace.Networking.MicroProtocol;
@@ -50,14 +51,14 @@ namespace SslChat.Common
         }
 
         public override ClientSslStreamFactory GetClientSslFactory(string targetCommonCame = "",
-            X509Certificate certificate = null)
+            X509Certificate2 certificate = null, SslProtocols protocols = SslProtocols.Tls12)
         {
             if (SslMode != SslMode.None & RequireClientCertificate && certificate == null)
                 throw new ArgumentNullException(nameof(certificate));
             return new ClientSslStreamFactory(targetCommonCame, certificate);
         }
 
-        public override ServerSslStreamFactory GetServerSslFactory(X509Certificate certificate = null)
+        public override ServerSslStreamFactory GetServerSslFactory(X509Certificate2 certificate = null)
         {
             if (SslMode != SslMode.None && certificate == null)
                 throw new ArgumentNullException(nameof(certificate));

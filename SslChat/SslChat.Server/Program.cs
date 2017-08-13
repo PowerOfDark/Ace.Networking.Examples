@@ -24,7 +24,7 @@ namespace SslChat.Server
         private static void Main(string[] args)
         {
             var cfg = MicroProtocolConfiguration.Instance;
-            var certificate = new X509Certificate("localhost.pfx", "foobar");
+            var certificate = new X509Certificate2("localhost.pfx", "foobar");
             var sslFactory = cfg.GetServerSslFactory(certificate);
             Server = new TcpServer(new IPEndPoint(IPAddress.Loopback, 12345), cfg, sslFactory)
             {
@@ -32,7 +32,7 @@ namespace SslChat.Server
             };
             Server.ClientDisconnected += Server_ClientDisconnected;
             Server.ReceiveTimeout = TimeSpan.FromMilliseconds(5000);
-            Server.Timeout += Server_Timeout;
+            Server.IdleTimeout += Server_Timeout;
             Server.On<C2S_JoinChat>(JoinChat);
             Server.On<C2S_SendMessage>(SendMessage);
             Server.Start();
@@ -54,6 +54,7 @@ namespace SslChat.Server
 
         private static object SendMessage(Connection connection, C2S_SendMessage payload)
         {
+            
             if (connection.Data.Get("Connected", false))
             {
                 var username = connection.Data.Get("Username", connection.Guid.ToString());

@@ -67,16 +67,16 @@ namespace Ace.Networking.Example.Client
                 Console.SetCursorPosition(0, Console.CursorTop - 1);
                 Console.WriteLine(new string('#', Console.WindowWidth));
 
-                X509Certificate cert;
+                X509Certificate2 cert;
                 try
                 {
                     if (string.IsNullOrEmpty(pass))
                     {
-                        cert = new X509Certificate($"{username}.pfx");
+                        cert = new X509Certificate2($"{username}.pfx");
                     }
                     else
                     {
-                        cert = new X509Certificate($"{username}.pfx", pass);
+                        cert = new X509Certificate2($"{username}.pfx", pass);
                         pass = null;
                     }
                 }
